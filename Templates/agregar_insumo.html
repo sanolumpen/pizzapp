@@ -1,0 +1,43 @@
+<!-- filepath: d:\PizzApp\Templates\agregar_insumo.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Agregar Insumo</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #e74c3c; }
+        form { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        .btn { padding: 10px 15px; background-color: #3498db; color: white; border: none; cursor: pointer; }
+        .btn:hover { background-color: #2980b9; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 10px; text-decoration: none; color: #3498db; }
+    </style>
+</head>
+<body>
+    <h1>Agregar Nuevo Insumo</h1>
+    <div class="nav">
+        <a href="{{ url_for('index') }}">← Volver al Inventario</a>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <form method="POST">
+        <div class="form-group">
+            <label for="nombre">Nombre del Insumo:</label>
+            <input type="text" id="nombre" name="nombre" required>
+        </div>
+        <button type="submit" class="btn">Agregar Insumo</button>
+    </form>
+</body>
+</html>

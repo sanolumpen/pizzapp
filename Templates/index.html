@@ -1,0 +1,255 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Inventario Inari</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px;}
+        h1 { color: #e74c3c; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #f2f2f2; }
+        .btn { padding: 6px 12px; text-decoration: none; color: white; border-radius: 4px; display: inline-block; margin: 2px; }
+        .btn-primary { background-color: #3498db; }
+        .btn-warning { background-color: #f39c12; }
+        .btn-danger { background-color: #e74c3c; }
+        .flash { padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; margin-bottom: 15px; border-radius: 4px;}
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 10px; text-decoration: none; color: white; padding: 8px 12px; border-radius: 4px; }
+        .nav a.btn-primary { background-color: #3498db; }
+    </style>
+</head>
+<body>
+    <h1>Inventario de Materia Prima - Inari</h1>
+    <div class="nav">
+        <a href="{{ url_for('index') }}" class="btn btn-primary">Inventario</a>
+        <a href="{{ url_for('nuevo') }}" class="btn btn-primary">Nuevo Ítem</a>
+        <a href="{{ url_for('configuracion') }}" class="btn btn-primary">Configuración</a>
+    </div>
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="flash">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+    <table>
+        <thead>
+            <tr>
+                <th>Insumo</th>
+                <th>Marca</th>
+                <th>Presentación</th>
+                <th>Precio</th>
+                <th>Fecha de Compra</th>
+                <th>Fecha de Vencimiento</th>
+                <th>Cantidad</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in items %}
+                <tr>
+                    <td>{{ item['insumo'] }}</td>
+                    <td>{{ item['marca'] }}</td>
+                    <td>{{ item['presentacion'] }}</td>
+                    <td>{{ item['precio'] }}</td>
+                    <td>{{ item['fecha_compra'] }}</td>
+                    <td>{{ item['fecha_vencimiento'] }}</td>
+                    <td>{{ item['cantidad'] }}</td>
+                    <td>
+                        <a href="{{ url_for('editar', id=item['id']) }}" class="btn btn-warning">Editar</a>
+                        <a href="{{ url_for('eliminar', id=item['id']) }}" class="btn btn-danger" onclick="return confirm('¿Estás seguro de eliminar este ítem?')">Eliminar</a>
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>
+
+<!-- templates/formulario.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% if editar %}Editar{% else %}Nuevo{% endif %} Ítem - Inventario Inari</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px;}
+        h1 { color: #e74c3c; }
+        form { max-width: 600px; margin: 0 auto; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input, select { width: 100%; padding: 8px; box-sizing: border-box;}
+        .btn { padding: 10px 15px; background-color: #3498db; color: white; border: none; cursor:pointer;}
+        .btn:hover { background-color: #2980b9; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 10px; text-decoration: none; color: #3498db; }
+</style>
+</head>
+<body>
+    <h1>{%if editar %}Editar{% else %}Nuevo{% endif %} Ítem de Inventario</h1>
+
+    <div class="nav">
+        <a href="{{ url_for('index') }}">← Volver al Inventario</a>
+    </div>
+
+    <form method="post">
+        <div class="form-group">
+            <label for="insumo_id">Insumo:</label>
+            <select name="insumo_id" id="insumo_id" required>
+                {% for insumo in insumos %}
+                <option value="{{ insumo['id'] }}" {% if item and item['insumo_id'] == insumo['id'] %}selected{% endif %}>
+                    {{ insumo['nombre'] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="marca_id">Marca:</label>
+            <select name="marca_id" id="marca_id" required>
+                {% for marca in marcas %}
+                <option value="{{ marca['id'] }}" {% if item and item['marca_id'] == marca['id'] %}selected{% endif %}>
+                    {{ marca['nombre'] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="presentacion_id">Presentación:</label>
+            <select name="presentacion_id" id="presentacion_id" required>
+                {% for presentacion in presentaciones %}
+                <option value="{{ presentacion['id'] }}" {% if item and item['presentacion_id'] == presentacion['id'] %}selected{% endif %}>
+                    {{ presentacion['descripcion'] }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="precio">Precio:</label>
+            <input type="number" step="0.01" name="precio" id="precio" required value="{% if item %}{{ item['precio'] }}{% endif %}">
+        </div>
+        
+        <div class="form-group">
+            <label for="fecha_compra">Fecha de Compra:</label>
+            <input type="date" name="fecha_compra" id="fecha_compra" required value="{% if item %}{{ item['fecha_compra'] }}{% endif %}">
+        </div>
+        
+        <div class="form-group">
+            <label for="fecha_vencimiento">Fecha de Vencimiento:</label>
+            <input type="date" name="fecha_vencimiento" id="fecha_vencimiento" required value="{% if item %}{{ item['fecha_vencimiento'] }}{% endif %}">
+        </div>
+        
+        <div class="form-group">
+            <button type="submit" class="btn">{% if editar %}Actualizar{% else %}Guardar{% endif %}</button>
+        </div>
+    </form>
+</body>
+</html>
+
+<!-- templates/configuracion.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Configuración - Inventario Pizzería</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #e74c3c; }
+        .container { display: flex; flex-wrap: wrap; justify-content: space-between; }
+        .section { width: 30%; min-width: 250px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; }
+        input { width: 90%; padding: 8px; }
+        .btn { padding: 8px 12px; background-color: #3498db; color: white; border: none; cursor: pointer; }
+        .btn:hover { background-color: #2980b9; }
+        ul { list-style-type: none; padding: 0; }
+        li { padding: 5px 0; border-bottom: 1px solid #eee; }
+        .flash { padding: 10px; background-color: #d4edda; border: 1px solid #c3e6cb; color: #155724; margin-bottom: 15px; border-radius: 4px; }
+        .nav { margin-bottom: 20px; }
+        .nav a { margin-right: 10px; text-decoration: none; color: #3498db; }
+    </style>
+</head>
+<body>
+    <h1>Configuración de Inventario</h1>
+    
+    <div class="nav">
+        <a href="{{ url_for('index') }}">← Volver al Inventario</a>
+    </div>
+    
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for message in messages %}
+                <div class="flash">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="container">
+        <div class="section">
+            <h2>Insumos</h2>
+            <form action="{{ url_for('agregar_insumo') }}" method="post">
+                <div class="form-group">
+                    <label for="nombre_insumo">Nuevo Insumo:</label>
+                    <input type="text" name="nombre" id="nombre_insumo" required>
+                </div>
+                <button type="submit" class="btn">Agregar</button>
+            </form>
+            
+            <h3>Insumos Existentes:</h3>
+            <ul>
+                {% for insumo in insumos %}
+                <li>{{ insumo['nombre'] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>Marcas</h2>
+            <form action="{{ url_for('agregar_marca') }}" method="post">
+                <div class="form-group">
+                    <label for="nombre_marca">Nueva Marca:</label>
+                    <input type="text" name="nombre" id="nombre_marca" required>
+                </div>
+                <button type="submit" class="btn">Agregar</button>
+            </form>
+            
+            <h3>Marcas Existentes:</h3>
+            <ul>
+                {% for marca in marcas %}
+                <li>{{ marca['nombre'] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="section">
+            <h2>Presentaciones</h2>
+            <form action="{{ url_for('agregar_presentacion') }}" method="post">
+                <div class="form-group">
+                    <label for="descripcion_presentacion">Nueva Presentación:</label>
+                    <input type="text" name="descripcion" id="descripcion_presentacion" required placeholder="Ej: 500g, 1kg, etc.">
+                </div>
+                <button type="submit" class="btn">Agregar</button>
+            </form>
+            
+            <h3>Presentaciones Existentes:</h3>
+            <ul>
+                {% for presentacion in presentaciones %}
+                <li>{{ presentacion['descripcion'] }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
+
+    
+</body>
